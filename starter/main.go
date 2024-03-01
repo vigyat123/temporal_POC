@@ -3,13 +3,24 @@ package main
 import (
 	"context"
 	"log"
+	"os"
+	s3Actions "temporal_POC"
 
+	"github.com/aws/aws-sdk-go-v2/config"
+	"github.com/aws/aws-sdk-go-v2/service/s3"
 	"go.temporal.io/sdk/client"
-
-	"github.com/temporalio/samples-go/helloworld"
 )
 
 func main() {
+	cfg, err := config.LoadDefaultConfig(context.Background())
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	os.Setenv("AWS_ACCESS_KEY_ID", "<access key id>")
+	os.Setenv("AWS_SECRET_ACCESS_KEY", "<secret access key id>")
+
+	s3Client := s3.NewFromConfig(cfg)
 	// The client is a heavyweight object that should be created once per process.
 	c, err := client.Dial(client.Options{})
 	if err != nil {
@@ -22,7 +33,7 @@ func main() {
 		TaskQueue: "hello-world",
 	}
 
-	we, err := c.ExecuteWorkflow(context.Background(), workflowOptions, helloworld.Workflow, "Temporal")
+	we, err := c.ExecuteWorkflow(context.Background(), workflowOptions, s3Actions.S3Workflow, s3Client)
 	if err != nil {
 		log.Fatalln("Unable to execute workflow", err)
 	}

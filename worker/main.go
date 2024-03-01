@@ -2,7 +2,7 @@ package main
 
 import (
 	"log"
-	helloworld "temporal_POC"
+	s3Actions "temporal_POC"
 
 	"go.temporal.io/sdk/client"
 	"go.temporal.io/sdk/worker"
@@ -18,8 +18,8 @@ func main() {
 
 	w := worker.New(c, "hello-world", worker.Options{})
 
-	w.RegisterWorkflow(helloworld.Workflow)
-	w.RegisterActivity(helloworld.Activity)
+	w.RegisterWorkflow(s3Actions.S3Workflow)
+	w.RegisterActivity(s3Actions.S3Activity)
 
 	err = w.Run(worker.InterruptCh())
 	if err != nil {
