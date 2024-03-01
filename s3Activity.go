@@ -2,7 +2,7 @@ package helloworld
 
 import (
 	"context"
-	"github.com/aws/aws-sdk-go-v2/aws"
+	"fmt"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
 	"time"
 
@@ -35,12 +35,18 @@ func S3Workflow(ctx workflow.Context, client s3.Client) (string, error) {
 func S3Activity(ctx context.Context, client s3.Client) (string, error) {
 	logger := activity.GetLogger(ctx)
 	logger.Info("Activity")
-	createBucketInput := &s3.CreateBucketInput{
-		Bucket: aws.String("testBucket123"),
-	}
-	_, err := client.CreateBucket(ctx, createBucketInput)
+	listBucketInput := &s3.ListBucketsInput{}
+	output, err := client.ListBuckets(ctx, listBucketInput)
 	if err != nil {
-		return "bucket creation failed", err
+		return "buckets not found", err
 	}
-	return "bucket created", nil
+	//createBucketInput := &s3.CreateBucketInput{
+	//	Bucket: aws.String("testBucket123"),
+	//}
+	//_, err := client.CreateBucket(ctx, createBucketInput)
+	//if err != nil {
+	//	return "bucket creation failed", err
+	//}
+	fmt.Println(output.Buckets[0])
+	return "buckets found", nil
 }
