@@ -3,7 +3,9 @@ package helloworld
 import (
 	"context"
 	"fmt"
+	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
+	"log"
 	"time"
 
 	"go.temporal.io/sdk/activity"
@@ -11,7 +13,7 @@ import (
 )
 
 // Workflow is a Hello World workflow definition.
-func S3Workflow(ctx workflow.Context, client s3.Client) (string, error) {
+func S3Workflow(ctx workflow.Context, name string) (string, error) {
 	ao := workflow.ActivityOptions{
 		StartToCloseTimeout: 10 * time.Second,
 	}
@@ -21,7 +23,7 @@ func S3Workflow(ctx workflow.Context, client s3.Client) (string, error) {
 	logger.Info("HelloWorld workflow started")
 
 	var result string
-	err := workflow.ExecuteActivity(ctx, S3Activity, client).Get(ctx, &result)
+	err := workflow.ExecuteActivity(ctx, S3Activity, name).Get(ctx, &result)
 	if err != nil {
 		logger.Error("Activity failed.", "Error", err)
 		return "", err
@@ -32,11 +34,17 @@ func S3Workflow(ctx workflow.Context, client s3.Client) (string, error) {
 	return result, nil
 }
 
-func S3Activity(ctx context.Context, client s3.Client) (string, error) {
+func S3Activity(ctx context.Context, name string) (string, error) {
+	cfg, err := config.LoadDefaultConfig(context.TODO(), config.WithRegion("us-east-1"))
+	if err != nil {
+		log.Fatal(err)
+	}
 	logger := activity.GetLogger(ctx)
 	logger.Info("Activity")
 	listBucketInput := &s3.ListBucketsInput{}
-	output, err := client.ListBuckets(ctx, listBucketInput)
+
+	s3Client := s3.NewFromConfig(cfg)
+	output, err := s3Client.ListBuckets(ctx, listBucketInput)
 	if err != nil {
 		return "buckets not found", err
 	}
@@ -47,6 +55,6 @@ func S3Activity(ctx context.Context, client s3.Client) (string, error) {
 	//if err != nil {
 	//	return "bucket creation failed", err
 	//}
-	fmt.Println(output.Buckets[0])
+	fmt.Println(*output.Buckets[4].Name)
 	return "buckets found", nil
 }

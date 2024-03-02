@@ -3,24 +3,26 @@ package main
 import (
 	"context"
 	"log"
-	"os"
 	s3Actions "temporal_POC"
 
-	"github.com/aws/aws-sdk-go-v2/config"
-	"github.com/aws/aws-sdk-go-v2/service/s3"
 	"go.temporal.io/sdk/client"
 )
 
 func main() {
-	cfg, err := config.LoadDefaultConfig(context.Background())
-	if err != nil {
-		log.Fatal(err)
-	}
+	//cfg, err := config.LoadDefaultConfig(context.TODO(), config.WithRegion("us-east-1"))
+	//if err != nil {
+	//	log.Fatal(err)
+	//}
 
-	os.Setenv("AWS_ACCESS_KEY_ID", "<access key id>")
-	os.Setenv("AWS_SECRET_ACCESS_KEY", "<secret access key id>")
-
-	s3Client := s3.NewFromConfig(cfg)
+	//cfg.Region = "us-east-1"
+	//s3Client := s3.NewFromConfig(cfg)
+	//listBucketInput := &s3.ListBucketsInput{}
+	//output, err := s3Client.ListBuckets(context.Background(), listBucketInput)
+	//if err != nil {
+	//	log.Fatalln("problem with s3", err)
+	//}
+	//fmt.Println("!!!!!!!!!!!!!!!!!!!!!!!!!!")
+	//fmt.Println(*output.Buckets[4].Name)
 	// The client is a heavyweight object that should be created once per process.
 	c, err := client.Dial(client.Options{})
 	if err != nil {
@@ -33,7 +35,7 @@ func main() {
 		TaskQueue: "hello-world",
 	}
 
-	we, err := c.ExecuteWorkflow(context.Background(), workflowOptions, s3Actions.S3Workflow, s3Client)
+	we, err := c.ExecuteWorkflow(context.Background(), workflowOptions, s3Actions.S3Workflow, "temporal")
 	if err != nil {
 		log.Fatalln("Unable to execute workflow", err)
 	}
